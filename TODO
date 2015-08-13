@@ -1,0 +1,15 @@
+- Create app/device objects
+    - Map<String, Object> ?
+    - Full App, AppState, Device, DeviceState objects for type safety?
+- Create internal callback to pre-fill app/device objects
+- MetaData merging
+- MetaData filtering?
+- Singleton access?
+    - Client.initialize("api-key");
+    - Client.getInstance()
+- Tests
+    - Unit tests
+    - Thread-safety tests
+    - Integration tests
+- Include java.util.logging Handler in core package
+- Example app

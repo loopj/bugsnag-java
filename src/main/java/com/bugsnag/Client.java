@@ -1,192 +1,193 @@
 package com.bugsnag;
 
-import com.bugsnag.http.NetworkException;
+import com.bugsnag.transports.Transport;
 
 public class Client {
-    protected Configuration config = new Configuration();
-    protected Diagnostics diagnostics = new Diagnostics(config);
+    private Configuration config;
 
+    /**
+     * Initialize a Bugsnag client
+     *
+     * @param  apiKey   your Bugsnag API key from your Bugsnag dashboard
+     */
     public Client(String apiKey) {
-        this(apiKey, true);
-    }
-
-    public Client(String apiKey, boolean installHandler) {
         if(apiKey == null) {
-            throw new RuntimeException("You must provide a Bugsnag API key");
+            throw new NullPointerException("You must provide a Bugsnag API key");
         }
-        config.apiKey = apiKey;
 
-        // Install a default exception handler with this client
-        if(installHandler) {
-            ExceptionHandler.install(this);
-        }
-    }
-
-    public void setContext(String context) {
-        config.context.setLocked(context);
+        config = new Configuration(apiKey);
     }
 
     /**
-    * @deprecated  Replaced by {@link #setUser(String, String, String)}}
-    */
-    public void setUserId(String id) {
-        config.setUser(id, null, null);
-    }
-
-    public void setUser(String id, String email, String name) {
-        config.setUser(id, email, name);
-    }
-
-    public void setReleaseStage(String releaseStage) {
-        config.releaseStage.setLocked(releaseStage);
-    }
-
-    public void setNotifyReleaseStages(String... notifyReleaseStages) {
-        config.setNotifyReleaseStages(notifyReleaseStages);
-    }
-
-    public void setAutoNotify(boolean autoNotify) {
-        config.setAutoNotify(autoNotify);
-    }
-
-    public void setUseSSL(boolean useSSL) {
-        config.setUseSSL(useSSL);
-    }
-
-    public boolean getUseSSL() {
-        return config.useSSL;
-    }
-
-    public void setEndpoint(String endpoint) {
-        config.setEndpoint(endpoint);
-    }
-
-    public void setFilters(String... filters) {
-        config.setFilters(filters);
-    }
-
-    public void setProjectPackages(String... projectPackages) {
-        config.setProjectPackages(projectPackages);
-    }
-
-    public void setOsVersion(String osVersion) {
-        config.osVersion.setLocked(osVersion);
-    }
-
+     * Set the application version sent to Bugsnag.
+     *
+     * @param  appVersion  the app version to send
+     */
     public void setAppVersion(String appVersion) {
-        config.appVersion.setLocked(appVersion);
+        config.appVersion = appVersion;
     }
 
-    public void setNotifierName(String notifierName) {
-        config.setNotifierName(notifierName);
+    /**
+     * Set the method of delivery for Bugsnag events. By default we'll send
+     * reports asynchronously using a thread pool to https://notify.bugsnag.com,
+     * but you can ovverride this to use a different sending technique or
+     * endpoint (for example, if you are using Bugsnag On-Premise).
+     *
+     * @param  transport  the transport mechanism to use
+     * @see    Transport
+     */
+    public void setTransport(Transport transport) {
+        config.transport = transport;
     }
 
-    public void setNotifierVersion(String notifierVersion) {
-        config.setNotifierVersion(notifierVersion);
+    /**
+     * Set which keys should be filtered when sending metaData to Bugsnag.
+     * Use this when you want to ensure sensitive information, such as passwords
+     * or credit card information is stripped from metaData you send to Bugsnag.
+     * Any keys in metaData which contain these strings will be marked as
+     * [FILTERED] when send to Bugsnag.
+     *
+     * For example:
+     *
+     *     client.setFilters("password", "credit_card");
+     *
+     * @param  filters  a list of keys to filter from metaData
+     */
+    public void setFilters(String... filters) {
+        config.filters = filters;
     }
 
-    public void setNotifierUrl(String notifierUrl) {
-        config.setNotifierUrl(notifierUrl);
-    }
-
+    /**
+     * Set which exception classes should be ignored (not sent) by Bugsnag.
+     *
+     * For example:
+     *
+     *     client.setIgnoreClasses("java.lang.RuntimeException");
+     *
+     * @param  ignoreClasses  a list of exception classes to ignore
+     */
     public void setIgnoreClasses(String... ignoreClasses) {
-        config.setIgnoreClasses(ignoreClasses);
+        config.ignoreClasses = ignoreClasses;
     }
 
-    public void setLogger(Logger logger) {
-        config.setLogger(logger);
+    /**
+     * Set for which releaseStages errors should be sent to Bugsnag.
+     * Use this to stop errors from development builds being sent.
+     *
+     * For example:
+     *
+     *     client.setNotifyReleaseStages("production");
+     *
+     * @param  notifyReleaseStages  a list of releaseStages to notify for
+     * @see    #setReleaseStage
+     */
+    public void setNotifyReleaseStages(String... notifyReleaseStages) {
+        config.notifyReleaseStages = notifyReleaseStages;
     }
 
-    public void setSendThreads(boolean sendThreads) {
-        config.setSendThreads(sendThreads);
+    /**
+     * Set which packages should be considered part of your application.
+     * Bugsnag uses this to help with error grouping, and stacktrace display.
+     *
+     * For example:
+     *
+     *     client.setProjectPackages("com.example.myapp");
+     *
+     * By default, we'll mark the current package name as part of you app.
+     *
+     * @param  projectPackages  a list of package names
+     */
+    public void setProjectPackages(String... projectPackages) {
+        config.projectPackages = projectPackages;
     }
 
-    public void addBeforeNotify(BeforeNotify beforeNotify) {
-        config.addBeforeNotify(beforeNotify);
+    /**
+     * Set the current "release stage" of your application.
+     *
+     * @param  releaseStage  the release stage of the app
+     * @see    #setNotifyReleaseStages
+     */
+    public void setReleaseStage(String releaseStage) {
+        config.releaseStage = releaseStage;
     }
 
-    public void notify(Error error) {
-        if(!config.shouldNotify()) return;
-        if(error.shouldIgnore()) return;
-        if(!beforeNotify(error)) return;
-
-        try {
-            Notification notif = new Notification(config, error);
-            notif.deliver();
-        } catch (NetworkException ex) {
-            config.logger.warn("Error notifying Bugsnag", ex);
-        }
+    /**
+     * Add a callback to execute code before/after every notification to Bugsnag.
+     *
+     * You can use this to add or modify information attached to an error
+     * before it is sent to your dashboard. You can also stop any events being
+     * sent to Bugsnag completely.
+     *
+     * For example:
+     *
+     *     client.addCallback(new Callback() {
+     *         @Override
+     *         public boolean beforeNotify(Event event) {
+     *             error.setSeverity(Severity.INFO);
+     *         }
+     *     })
+     *
+     * @param  callback  a callback to run before sending errors to Bugsnag
+     * @see    Callback
+     */
+    public void addCallback(Callback callback) {
+        config.addCallback(callback);
     }
 
-    public void notify(Throwable e, String severity, MetaData metaData) {
-        Error error = new Error(e, severity, metaData, config, diagnostics);
-        notify(error);
+    /**
+     * Notify Bugsnag of a handled exception
+     *
+     * @param  throwable  the exception to send to Bugsnag
+     */
+    public void notify(Throwable throwable) {
+        Event event = new Event(config, throwable);
+        notify(event);
     }
 
-    public void notify(Throwable e, MetaData metaData) {
-        notify(e, null, metaData);
+    /**
+     * Notify Bugsnag of a handled exception
+     *
+     * @param  throwable  the exception to send to Bugsnag
+     * @param  severity   the severity of the error, one of Severity.ERROR,
+     *                    Severity.WARNING or Severity.INFO
+     */
+    public void notify(Throwable throwable, Severity severity) {
+        Event event = new Event(config, throwable);
+        event.setSeverity(severity);
+        notify(event);
     }
 
-    public void notify(Throwable e, String severity) {
-        notify(e, severity, null);
+    /**
+     * Notify Bugsnag of a handled exception
+     *
+     * @param  exception  the exception to send to Bugsnag
+     * @param  metaData   additional information to send with the exception
+     */
+    public void notify(Throwable throwable, MetaData metaData) {
+        Event event = new Event(config, throwable);
+        event.setMetaData(metaData);
+        notify(event);
     }
 
-    public void notify(Throwable e) {
-        notify(e, null, null);
+    /**
+     * Notify Bugsnag of a handled exception
+     *
+     * @param  exception  the exception to send to Bugsnag
+     * @param  severity   the severity of the error, one of Severity.ERROR,
+     *                    Severity.WARNING or Severity.INFO
+     * @param  metaData   additional information to send with the exception
+     */
+    public void notify(Throwable throwable, Severity severity, MetaData metaData) {
+        Event event = new Event(config, throwable);
+        event.setSeverity(severity);
+        event.setMetaData(metaData);
+        notify(event);
     }
 
-    public void autoNotify(Throwable e) {
-        if(config.autoNotify) {
-            notify(e, "error");
-        }
-    }
+    private void notify(Event event) {
+        Notification notification = new Notification(config);
+        notification.addEvent(event);
 
-    public void addToTab(String tab, String key, Object value) {
-        config.addToTab(tab, key, value);
-    }
-
-    public void clearTab(String tab) {
-        config.clearTab(tab);
-    }
-
-    public void trackUser() {
-        try {
-            Metrics metrics = new Metrics(config, diagnostics);
-            metrics.deliver();
-        } catch (NetworkException ex) {
-            config.logger.warn("Error sending metrics to Bugsnag", ex);
-        }
-    }
-
-    protected boolean beforeNotify(Error error) {
-        for (BeforeNotify beforeNotify : config.beforeNotify) {
-            try {
-                if (!beforeNotify.run(error)) {
-                    return false;
-                }
-            } catch (Throwable ex) {
-                config.logger.warn("BeforeNotify threw an Exception", ex);
-            }
-        }
-
-        // By default, allow the error to be sent if there were no objections
-        return true;
-    }
-
-    // Factory methods so we don't have to expose the Configuration class
-    public Notification createNotification() {
-        return new Notification(config);
-    }
-
-    public Notification createNotification(Error error) {
-        return new Notification(config, error);
-    }
-
-    public Metrics createMetrics() {
-        return new Metrics(config, diagnostics);
-    }
-
-    public Error createError(Throwable e, String severity, MetaData metaData) {
-        return new Error(e, severity, metaData, config, diagnostics);
+        config.transport.send(notification);
     }
 }

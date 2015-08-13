@@ -1,85 +1,105 @@
 package com.bugsnag;
 
-import java.util.List;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Map;
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.json.JSONObject;
-import org.json.JSONArray;
-import org.json.JSONException;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 
-import com.bugsnag.utils.JSONUtils;
+//
+// TODO:JS - Add support for filters
+//
 
-public class MetaData extends JSONObject {
+public class MetaData {
+    private static final String FILTERED_PLACEHOLDER = "[FILTERED]";
+    private static final String OBJECT_PLACEHOLDER = "[OBJECT]";
+
+    private String[] filters;
+    private final Map<String, Object> store;
+
     public MetaData() {
-        super();
+        store = new ConcurrentHashMap<String, Object>();
     }
 
-    public MetaData(MetaData source) {
-        super();
-        Iterator keys = source.keys();
+    public MetaData(Map<String, Object> m) {
+        store = new ConcurrentHashMap<String, Object>(m);
+    }
 
-        while(keys.hasNext()) {
-            String key = (String)keys.next();
-            Object value = source.opt(key);
-            if(value != null) {
-                if( value instanceof JSONObject ){
-                    value = JSONUtils.deepClone((JSONObject)value);
-                }
-                JSONUtils.safePut(this, key, value);
-            }
-        }
+    @JsonAnyGetter
+    public Map<String, Object> getStore() {
+      return store;
     }
 
     public void addToTab(String tabName, String key, Object value) {
+        Map<String, Object> tab = getTab(tabName);
+
         if(value != null) {
-            JSONUtils.safePut(getTab(tabName), key, value);
+            tab.put(key, value);
         } else {
-            getTab(tabName).remove(key);
+            tab.remove(key);
         }
     }
 
-    public void addToTab(String tabName, Object value) {
-        if(value instanceof Map) {
-            JSONObject tab = getTab(tabName);
-            
-            @SuppressWarnings("unchecked")
-            Map<String, Object> mapValue = (Map<String, Object>)value;
-            
-            for (Map.Entry<String, Object> entry : mapValue.entrySet()) {
-                JSONUtils.safePut(tab, entry.getKey(), entry.getValue());
+    public void clearTab(String tabName) {
+        store.remove(tabName);
+    }
+
+    Map<String, Object> getTab(String tabName) {
+        Map<String, Object> tab = (Map<String, Object>)store.get(tabName);
+
+        if(tab == null) {
+            tab = new ConcurrentHashMap<String, Object>();
+            store.put(tabName, tab);
+        }
+
+        return tab;
+    }
+
+    void setFilters(String... filters) {
+        this.filters = filters;
+    }
+
+    static MetaData merge(MetaData... metaDataList) {
+        ArrayList<Map<String, Object>> stores = new ArrayList<Map<String, Object>>();
+        for(MetaData metaData : metaDataList) {
+            if(metaData != null) {
+                stores.add(metaData.store);
             }
-        } else {
-            addToTab("Custom Data", tabName, value);
         }
+
+        return new MetaData(mergeMaps(stores.toArray(new Map[0])));
     }
 
-    public void clearTab(String tabName){
-        remove(tabName);
-    }
+    private static Map<String, Object> mergeMaps(Map<String, Object>... maps) {
+        Map<String, Object> result = new ConcurrentHashMap<String, Object>();
 
-    public MetaData duplicate() {
-        return new MetaData(this);
-    }
+        for(Map<String, Object> map : maps) {
+            if(map == null) continue;
 
-    public MetaData filter(String[] filters) {
-        JSONUtils.filter(this, filters);
-        return this;
-    }
+            // Get a set of all possible keys in base and overrides
+            Set<String> allKeys = new HashSet<String>(result.keySet());
+            allKeys.addAll(map.keySet());
 
-    public MetaData merge(JSONObject source) {
-        JSONUtils.merge(this, source);
-        return this;
-    }
+            for(String key : allKeys) {
+                Object baseValue = result.get(key);
+                Object overridesValue = map.get(key);
 
-    private JSONObject getTab(String tabName) {
-        Object tab = opt(tabName);
-
-        if(tab == null || !(tab instanceof JSONObject)) {
-            tab = new JSONObject();
-            JSONUtils.safePut(this, tabName, tab);
+                if(overridesValue != null) {
+                    if(baseValue != null && baseValue instanceof Map && overridesValue instanceof Map) {
+                        // Both original and overrides are Maps, go deeper
+                        result.put(key, mergeMaps((Map<String, Object>)baseValue, (Map<String, Object>)overridesValue));
+                    } else {
+                        result.put(key, overridesValue);
+                    }
+                } else {
+                    // No collision, just use base value
+                    result.put(key, baseValue);
+                }
+            }
         }
-        return (JSONObject)tab;
+
+        return result;
     }
 }
