@@ -8,16 +8,34 @@ public class AsyncTransport extends HttpTransport {
     private static final int DEFAULT_NUM_THREADS = 5;
     private static final int SHUTDOWN_TIMEOUT = 5000;
 
-    private ExecutorService executorService;
+    protected Transport baseTransport;
+    protected ExecutorService executorService;
     private boolean shuttingDown = false;
 
     public AsyncTransport() {
-        this(Executors.newFixedThreadPool(DEFAULT_NUM_THREADS));
+        this(null, null);
+    }
+
+    public AsyncTransport(Transport baseTransport) {
+        this(baseTransport, null);
     }
 
     public AsyncTransport(ExecutorService executorService) {
-        super();
-        this.executorService = executorService;
+        this(null, executorService);
+    }
+
+    public AsyncTransport(Transport baseTransport, ExecutorService executorService) {
+        if(baseTransport == null) {
+            this.baseTransport = new HttpTransport();
+        } else {
+            this.baseTransport = baseTransport;
+        }
+
+        if(executorService == null) {
+            this.executorService = Executors.newFixedThreadPool(DEFAULT_NUM_THREADS);
+        } else {
+            this.executorService = executorService;
+        }
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -28,13 +46,21 @@ public class AsyncTransport extends HttpTransport {
         });
     }
 
+    public void setBaseTransport(Transport baseTransport) {
+        this.baseTransport = baseTransport;
+    }
+
+    public void setExecutorService(ExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
     public void send(final Object object) {
         if(shuttingDown) return;
 
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                AsyncTransport.super.send(object);
+                baseTransport.send(object);
             }
         });
     }

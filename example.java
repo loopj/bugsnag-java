@@ -15,7 +15,7 @@ bugsnag.setTransport(new OutputStreamTransport(System.out));
 // Configure what is sent to Bugsnag
 bugsnag.setNotifyReleaseStages("production", "staging");
 bugsnag.setAutoNotify(true);
-bugsnag.setMetaDataFilters("password");
+bugsnag.setFilters("password");
 bugsnag.setIgnoreClasses("java.io.IOException", "com.example.Custom");
 bugsnag.setSendThreads(true);
 
@@ -40,12 +40,6 @@ bugsnag.addCallback(new Callback() {
         // Set the context for this event
         event.setContext("BlahController");
         event.getContext();
-
-        // Set some metadata for this event
-        event.addToTab("account", "name", "Acme Co.");
-        event.clearTab("account");
-        event.setMetaData(...);
-        event.getMetaData();
 
         // Set grouping rules for this event
         event.setGroupingHash("...");

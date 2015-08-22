@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.bugsnag.transports.Transport;
 import com.bugsnag.transports.AsyncTransport;
+import com.bugsnag.transports.Transport;
 
 /**
  * User-specified configuration storage object, contains information

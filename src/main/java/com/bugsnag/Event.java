@@ -7,12 +7,6 @@ public class Event {
     public Severity severity = Severity.WARNING;
     public String payloadVersion = "2";
     public String groupingHash;
-    public MetaData metaData;
-    public MetaData app;
-    public MetaData appState;
-    public MetaData device;
-    public MetaData deviceState;
-    public User user;
 
     private Configuration config;
     private Throwable throwable;
@@ -40,11 +34,7 @@ public class Event {
         return ThreadState.getLiveThreads(config);
     }
 
-    void setSeverity(Severity severity) {
+    public void setSeverity(Severity severity) {
         this.severity = severity;
-    }
-
-    void setMetaData(MetaData metaData) {
-        this.metaData = metaData;
     }
 }

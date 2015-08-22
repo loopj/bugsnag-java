@@ -10,11 +10,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class HttpTransport implements Transport {
-    static final String DEFAULT_ENDPOINT = "https://notify.bugsnag.com";
-    static final int DEFAULT_TIMEOUT = 5000;
+    protected static final String DEFAULT_ENDPOINT = "https://notify.bugsnag.com";
+    protected final int DEFAULT_TIMEOUT = 5000;
 
-    private String endpoint = DEFAULT_ENDPOINT;
-    private int timeout = DEFAULT_TIMEOUT;
+    protected String endpoint = DEFAULT_ENDPOINT;
+    protected int timeout = DEFAULT_TIMEOUT;
 
     public HttpTransport() {}
 

@@ -1,5 +1,7 @@
 package com.bugsnag;
 
+import com.bugsnag.transports.AsyncTransport;
+import com.bugsnag.transports.HttpTransport;
 import com.bugsnag.transports.Transport;
 
 public class Client {
@@ -38,6 +40,17 @@ public class Client {
      */
     public void setTransport(Transport transport) {
         config.transport = transport;
+    }
+
+    /**
+     * Set the endpoint to deliver Bugsnag events to. This is a convenient
+     * shorthand for setTransport(new AsyncTransport(new HttpTransport(endpoint)));
+     *
+     * @param  endpoint  the endpoint to send events to
+     * @see    setTransport
+     */
+    public void setEndpoint(String endpoint) {
+        config.transport = new AsyncTransport(new HttpTransport(endpoint));
     }
 
     /**
@@ -157,37 +170,25 @@ public class Client {
         notify(event);
     }
 
-    /**
-     * Notify Bugsnag of a handled exception
-     *
-     * @param  exception  the exception to send to Bugsnag
-     * @param  metaData   additional information to send with the exception
-     */
-    public void notify(Throwable throwable, MetaData metaData) {
-        Event event = new Event(config, throwable);
-        event.setMetaData(metaData);
-        notify(event);
-    }
-
-    /**
-     * Notify Bugsnag of a handled exception
-     *
-     * @param  exception  the exception to send to Bugsnag
-     * @param  severity   the severity of the error, one of Severity.ERROR,
-     *                    Severity.WARNING or Severity.INFO
-     * @param  metaData   additional information to send with the exception
-     */
-    public void notify(Throwable throwable, Severity severity, MetaData metaData) {
-        Event event = new Event(config, throwable);
-        event.setSeverity(severity);
-        event.setMetaData(metaData);
-        notify(event);
-    }
-
     private void notify(Event event) {
+        // TODO: Don't notify if this error class should be ignored
+        // TODO: Don't notify unless releaseStage is in notifyReleaseStages
+
+        // Run beforeNotify callbacks
+        for(Callback callback : config.callbacks) {
+            try {
+                callback.beforeNotify(event);
+                // TODO: Halt notification if event.ignore() was called
+            } catch (Throwable ex) {
+                // TODO: Log that a callback threw an exception, but dont stop
+            }
+        }
+
+        // Build the notification
         Notification notification = new Notification(config);
         notification.addEvent(event);
 
+        // Deliver the notification
         config.transport.send(notification);
     }
 }

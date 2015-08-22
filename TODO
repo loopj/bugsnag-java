@@ -1,9 +1,12 @@
-- Create app/device objects
+## TODO
+
+- Support sending MDC (mapped diagnostic context from log4j or logback)
+- Make Client's MetaData, Context, User backed by InheritableThreadLocal
+- Actually implement addToTab/metadata correctly
+- Implement filtering
+- Create and fill app/device objects
     - Map<String, Object> ?
     - Full App, AppState, Device, DeviceState objects for type safety?
-- Create internal callback to pre-fill app/device objects
-- MetaData merging
-- MetaData filtering?
 - Singleton access?
     - Client.initialize("api-key");
     - Client.getInstance()
@@ -13,3 +16,47 @@
     - Integration tests
 - Include java.util.logging Handler in core package
 - Example app
+
+
+##Thoughts around MetaData
+
+- Want to be able to add extra internal MetaData with addToTab
+    - Per Bugsnag Client instance
+        - eg. During app startup
+        - Sent with all threads
+        - InheritableThreadLocal?
+
+            client.addToTab("tabName", "key", "value");
+
+    - Per thread
+        - When new data becomes available (eg, after a user logs in)
+        - From other packages, such as request/session information
+        - Sent with every error report on this thread, not added to per-client context data
+        - InheritableThreadLocal?
+
+            client.addToTab("tabName", "key", "value");
+
+    - Per error report
+        - Passed in Bugsnag.notify
+
+            Event = client.buildEvent(throwable);
+            event.addToTab(...);
+
+            Bugsnag.notify(event)
+
+        - Or set via callback
+
+            event.addToTab()
+
+- If you are using MDC (from log4j or logback) we'll automatically include this as a tab named "MDC" with every error report
+
+- Want to be able to filter out sensitive data
+    - From
+        - Internal MetaData map built with addToTab
+        - MDC
+        - Exception messages
+    - By
+        - Matching key names in maps
+            - setMetaDataKeyFilters("password")
+        - Matching a regex in MetaData values, MDC values and exception messages (eg. )
+            - setFilters(new Regexp(""))
