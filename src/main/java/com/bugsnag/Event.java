@@ -2,6 +2,9 @@ package com.bugsnag;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import com.google.common.collect.Maps;
 
 public class Event {
     public Severity severity = Severity.WARNING;
@@ -11,6 +14,8 @@ public class Event {
     private Configuration config;
     private Throwable throwable;
     private String context;
+
+    private MetaData metaData = new MetaData();
 
     Event(Configuration config, Throwable throwable) {
         this.config = config;
@@ -36,5 +41,17 @@ public class Event {
 
     public void setSeverity(Severity severity) {
         this.severity = severity;
+    }
+
+    public Map getMetaData() {
+        // Merge metadata maps
+        Map mergedMap = new MapMerger(config.metaData.getProperties(), metaData.getProperties()).merge();
+
+        // Apply filters
+        return Maps.transformEntries(mergedMap, new FilterTransformer(config.filters));
+    }
+
+    public void addToTab(String tabName, String key, Object value) {
+        metaData.addToTab(tabName, key, value);
     }
 }

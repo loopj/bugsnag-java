@@ -40,7 +40,6 @@ public class AsyncTransport extends HttpTransport {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                System.out.println("SHUTTING DOWN THE JVM");
                 AsyncTransport.this.shutdown();
             }
         });
@@ -71,15 +70,16 @@ public class AsyncTransport extends HttpTransport {
         executorService.shutdown();
         try {
             if (!executorService.awaitTermination(SHUTDOWN_TIMEOUT, TimeUnit.MILLISECONDS)) {
-                System.out.println("Graceful shutdown took too much time, forcing the shutdown.");
+                // TODO: Move to logger
+                System.out.println("Shutdown took too long - forcing a shutdown now");
                 executorService.shutdownNow();
             }
-            System.out.println("Shutdown finished.");
         } catch (InterruptedException e) {
-            System.out.println("Graceful shutdown interrupted, forcing the shutdown.");
+            // TODO: Move to logger
+            System.out.println("Shutdown was interrupted - forcing a shutdown now");
             executorService.shutdownNow();
         } finally {
-            // actualConnection.close();
+
         }
     }
 }

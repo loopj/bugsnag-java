@@ -16,6 +16,7 @@ repositories {
 dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.+'
     compile 'org.slf4j:slf4j-api:1.+'
+    compile 'com.google.guava:guava:12.+'
 
     testCompile 'junit:junit:4.+'
     testCompile 'org.slf4j:slf4j-jdk14:1.+'

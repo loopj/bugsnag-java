@@ -170,7 +170,12 @@ public class Client {
         notify(event);
     }
 
-    private void notify(Event event) {
+    /**
+     * Notify Bugsnag of an Event
+     *
+     * @param  event  the Event object to send to Bugsnag
+     */
+    public void notify(Event event) {
         // TODO: Don't notify if this error class should be ignored
         // TODO: Don't notify unless releaseStage is in notifyReleaseStages
 
@@ -190,5 +195,31 @@ public class Client {
 
         // Deliver the notification
         config.transport.send(notification);
+    }
+
+    /**
+     * Add diagnostic information to every error report.
+     * Diagnostic information is collected in "tabs" on your dashboard.
+     *
+     * For example:
+     *
+     *     client.addToTab("account", "name", "Acme Co.");
+     *     client.addToTab("account", "payingCustomer", true);
+     *
+     * @param  tab    the dashboard tab to add diagnostic data to
+     * @param  key    the name of the diagnostic information
+     * @param  value  the contents of the diagnostic information
+     */
+    public void addToTab(String tab, String key, Object value) {
+        config.metaData.addToTab(tab, key, value);
+    }
+
+    /**
+     * Remove a tab of app-wide diagnostic information
+     *
+     * @param  tabName  the dashboard tab to remove diagnostic data from
+     */
+    public void clearTab(String tabName) {
+        config.metaData.clearTab(tabName);
     }
 }

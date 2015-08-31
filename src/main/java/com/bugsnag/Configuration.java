@@ -22,6 +22,8 @@ class Configuration {
     String[] projectPackages;
     String releaseStage;
 
+    MetaData metaData = new MetaData();
+
     Collection<Callback> callbacks = new ArrayList<Callback>();
 
     Configuration(String apiKey) {
