@@ -25,6 +25,7 @@ class Configuration {
     String releaseStage;
 
     MetaData metaData = new MetaData();
+    String context;
 
     Collection<Callback> callbacks = new ArrayList<Callback>();
 

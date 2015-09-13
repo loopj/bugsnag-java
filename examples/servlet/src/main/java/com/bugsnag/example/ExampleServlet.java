@@ -14,12 +14,13 @@ public class ExampleServlet extends HttpServlet {
 
     public ExampleServlet() {
         bugsnag = new Client("3fd63394a0ec74ac916fbdf3110ed957");
+        bugsnag.addToTab("custom", "james", "awesome");
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         bugsnag.notify(new RuntimeException("Something broke"));
 
-        throw new ServletException("Something went wrong!");
+        throw new ServletException("Something else went wrong!");
     }
 }

@@ -66,9 +66,9 @@ public class HttpTransport implements Transport {
                 throw new RuntimeException("Bad response when sending events to Bugsnag");
             }
         } catch(JsonProcessingException ex) {
-            throw new RuntimeException("Could not serialize object");
-        } catch (IOException e) {
-            throw new RuntimeException("Could not send events to Bugsnag");
+            throw new RuntimeException("Could not serialize object", ex);
+        } catch (IOException ex) {
+            throw new RuntimeException("Could not send events to Bugsnag", ex);
         } finally {
             connection.disconnect();
         }

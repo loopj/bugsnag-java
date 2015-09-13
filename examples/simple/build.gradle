@@ -1,13 +1,14 @@
 apply plugin: 'java'
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
     compile rootProject
 }
 
+// Build a fat jar for ease of testing
 jar {
     from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
 

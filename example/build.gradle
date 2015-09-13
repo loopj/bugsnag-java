@@ -1,15 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'war'
-
-buildscript {
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'org.akhikhl.gretty:gretty:+'
-    }
-}
+apply plugin: 'jetty'
 
 repositories {
     jcenter()
@@ -22,5 +13,3 @@ dependencies {
 dependencies {
     compile rootProject
 }
-
-apply plugin: 'org.akhikhl.gretty'

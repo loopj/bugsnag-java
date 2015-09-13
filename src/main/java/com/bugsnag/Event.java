@@ -39,10 +39,6 @@ public class Event {
         return ThreadState.getLiveThreads(config);
     }
 
-    public void setSeverity(Severity severity) {
-        this.severity = severity;
-    }
-
     public Map getMetaData() {
         // Merge metadata maps
         Map mergedMap = new MapMerger(config.metaData.getProperties(), metaData.getProperties()).merge();
@@ -51,7 +47,19 @@ public class Event {
         return Maps.transformEntries(mergedMap, new FilterTransformer(config.filters));
     }
 
+    public String getContext() {
+        return config.context != null ? config.context : this.context;
+    }
+
+    public void setSeverity(Severity severity) {
+        this.severity = severity;
+    }
+
     public void addToTab(String tabName, String key, Object value) {
         metaData.addToTab(tabName, key, value);
+    }
+
+    public void setContext(String context) {
+        this.context = context;
     }
 }
