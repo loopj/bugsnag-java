@@ -8,6 +8,8 @@ import java.util.List;
 import com.bugsnag.transports.AsyncTransport;
 import com.bugsnag.transports.Transport;
 
+import com.bugsnag.callbacks.ServletCallback;
+
 /**
  * User-specified configuration storage object, contains information
  * specified at the client level.
@@ -29,6 +31,9 @@ class Configuration {
     Configuration(String apiKey) {
         this.apiKey = apiKey;
         this.transport = new AsyncTransport();
+
+        // Add built-in callbacks
+        addCallback(new ServletCallback());
     }
 
     boolean shouldNotifyForReleaseStage(String releaseStage) {

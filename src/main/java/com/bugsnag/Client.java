@@ -186,6 +186,7 @@ public class Client {
                 // TODO: Halt notification if event.ignore() was called
             } catch (Throwable ex) {
                 // TODO: Log that a callback threw an exception, but dont stop
+                System.out.println("Callback threw an exception");
             }
         }
 
@@ -194,6 +195,7 @@ public class Client {
         notification.addEvent(event);
 
         // Deliver the notification
+        System.out.println("Notifying Bugsnag of an exception.");
         config.transport.send(notification);
     }
 
