@@ -1,22 +1,24 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-
-    }
-}
-
 apply plugin: 'java'
 
 repositories {
     mavenCentral()
 }
 
+configurations {
+    provided
+}
+
+sourceSets {
+    main {
+        compileClasspath += configurations.provided
+    }
+}
+
 dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.+'
-    compile 'org.slf4j:slf4j-api:1.+'
     compile 'com.google.guava:guava:12.+'
+    provided 'org.slf4j:slf4j-api:1.+'
+    provided 'javax.servlet:javax.servlet-api:3.0.1'
 
     testCompile 'junit:junit:4.+'
     testCompile 'org.slf4j:slf4j-jdk14:1.+'
