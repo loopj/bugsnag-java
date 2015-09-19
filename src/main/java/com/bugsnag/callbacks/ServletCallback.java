@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.bugsnag.Callback;
 import com.bugsnag.Event;
 
 import com.bugsnag.servlet.BugsnagServletRequestListener;

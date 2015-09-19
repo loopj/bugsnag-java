@@ -6,6 +6,9 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import com.bugsnag.util.FilterTransformer;
+import com.bugsnag.util.MapMerger;
+
 public class Event {
     public Severity severity = Severity.WARNING;
     public String payloadVersion = "2";

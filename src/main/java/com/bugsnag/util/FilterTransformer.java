@@ -1,4 +1,4 @@
-package com.bugsnag;
+package com.bugsnag.util;
 
 import java.util.Map;
 

@@ -1,5 +1,6 @@
 package com.bugsnag;
 
+import com.bugsnag.callbacks.Callback;
 import com.bugsnag.transports.AsyncTransport;
 import com.bugsnag.transports.HttpTransport;
 import com.bugsnag.transports.Transport;

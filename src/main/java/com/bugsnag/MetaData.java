@@ -4,6 +4,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 
+import com.bugsnag.util.ThreadLocalMap;
+
 class MetaData {
     private Map tabs = new ThreadLocalMap();
 

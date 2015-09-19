@@ -8,6 +8,7 @@ import java.util.List;
 import com.bugsnag.transports.AsyncTransport;
 import com.bugsnag.transports.Transport;
 
+import com.bugsnag.callbacks.Callback;
 import com.bugsnag.callbacks.ServletCallback;
 
 /**
