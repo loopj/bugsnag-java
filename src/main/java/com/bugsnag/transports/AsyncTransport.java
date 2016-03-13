@@ -5,12 +5,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class AsyncTransport extends HttpTransport {
-    private static final int DEFAULT_NUM_THREADS = 5;
     private static final int SHUTDOWN_TIMEOUT = 5000;
 
     protected Transport baseTransport;
     protected ExecutorService executorService;
     private boolean shuttingDown = false;
+    private ShutdownHandler shutdownHandler = new ShutdownHandler();
 
     public AsyncTransport() {
         this(null, null);
@@ -32,17 +32,12 @@ public class AsyncTransport extends HttpTransport {
         }
 
         if(executorService == null) {
-            this.executorService = Executors.newFixedThreadPool(DEFAULT_NUM_THREADS);
+            this.executorService = Executors.newSingleThreadExecutor();
         } else {
             this.executorService = executorService;
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                AsyncTransport.this.shutdown();
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(shutdownHandler);
     }
 
     public void setBaseTransport(Transport baseTransport) {
@@ -66,8 +61,8 @@ public class AsyncTransport extends HttpTransport {
 
     private void shutdown() {
         shuttingDown = true;
-
         executorService.shutdown();
+
         try {
             if (!executorService.awaitTermination(SHUTDOWN_TIMEOUT, TimeUnit.MILLISECONDS)) {
                 // TODO: Move to logger
@@ -80,6 +75,13 @@ public class AsyncTransport extends HttpTransport {
             executorService.shutdownNow();
         } finally {
 
+        }
+    }
+
+    private final class ShutdownHandler extends Thread {
+        @Override
+        public void run() {
+            AsyncTransport.this.shutdown();
         }
     }
 }

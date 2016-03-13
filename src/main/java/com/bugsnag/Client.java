@@ -9,16 +9,31 @@ public class Client {
     private Configuration config;
 
     /**
-     * Initialize a Bugsnag client
+     * Initialize a Bugsnag client and automatically send uncaught exceptions
      *
-     * @param  apiKey   your Bugsnag API key from your Bugsnag dashboard
+     * @param  apiKey                   your Bugsnag API key from your Bugsnag dashboard
      */
     public Client(String apiKey) {
+        this(apiKey, true);
+    }
+
+    /**
+     * Initialize a Bugsnag client
+     *
+     * @param  apiKey                   your Bugsnag API key from your Bugsnag dashboard
+     * @param  sendUncaughtExceptions   should we send uncaught exceptions to Bugsnag
+     */
+    public Client(String apiKey, boolean sendUncaughtExceptions) {
         if(apiKey == null) {
             throw new NullPointerException("You must provide a Bugsnag API key");
         }
 
         config = new Configuration(apiKey);
+
+        // Automatically send unhandled exceptions to Bugsnag using this Client
+        if(sendUncaughtExceptions) {
+            ExceptionHandler.enable(this);
+        }
     }
 
     /**
@@ -27,13 +42,14 @@ public class Client {
      * @param  appVersion  the app version to send
      */
     public void setAppVersion(String appVersion) {
+        // TODO: Do something with this
         config.appVersion = appVersion;
     }
 
     /**
      * Set the method of delivery for Bugsnag events. By default we'll send
      * reports asynchronously using a thread pool to https://notify.bugsnag.com,
-     * but you can ovverride this to use a different sending technique or
+     * but you can override this to use a different sending technique or
      * endpoint (for example, if you are using Bugsnag On-Premise).
      *
      * @param  transport  the transport mechanism to use
@@ -196,6 +212,7 @@ public class Client {
         notification.addEvent(event);
 
         // Deliver the notification
+        // TODO: Move this to logger
         System.out.println("Notifying Bugsnag of an exception.");
         config.transport.send(notification);
     }

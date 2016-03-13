@@ -8,7 +8,6 @@ import java.util.Set;
 public class BugsnagServletContainerInitializer implements ServletContainerInitializer {
     @Override
     public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
-        System.out.println("In BugsnagServletContainerInitializer.onStartup");
         ctx.addListener(BugsnagServletRequestListener.class);
     }
 }

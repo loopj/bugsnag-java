@@ -35,9 +35,12 @@ class Configuration {
         this.transport = new AsyncTransport();
 
         // Add built-in callbacks
-        addCallback(new ServletCallback());
+        if(ServletCallback.isAvailable()) {
+            addCallback(new ServletCallback());
+        }
     }
 
+    // TODO: Use this
     boolean shouldNotifyForReleaseStage(String releaseStage) {
         if(notifyReleaseStages == null)
             return true;
@@ -46,6 +49,7 @@ class Configuration {
         return stages.contains(releaseStage);
     }
 
+    // TODO: Use this
     boolean shouldIgnoreClass(String className) {
         if(ignoreClasses == null)
             return false;

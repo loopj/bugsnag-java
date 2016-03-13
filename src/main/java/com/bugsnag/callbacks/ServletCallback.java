@@ -13,14 +13,16 @@ import com.bugsnag.servlet.BugsnagServletRequestListener;
 public class ServletCallback extends Callback {
     private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
 
-    public void beforeNotify(Event event) {
-        // Skip this callback unless "javax.servlet.Servlet" is loaded
+    public static boolean isAvailable() {
         try {
-            Class.forName("javax.servlet.Servlet", false, this.getClass().getClassLoader());
+            Class.forName("javax.servlet.ServletRequestListener", false, ServletCallback.class.getClassLoader());
+            return true;
         } catch (ClassNotFoundException e) {
-            return;
+            return false;
         }
+    }
 
+    public void beforeNotify(Event event) {
         // Check if we have any servlet request data available
         HttpServletRequest request = BugsnagServletRequestListener.getServletRequest();
         if(request == null) return;
