@@ -1,6 +1,6 @@
-# Simple Bugsnag Java Example
+# Bugsnag Plain Java Example
 
-An super simple example application to show how to use Bugsnag in a plain Java application.
+A simple example application to show how to use Bugsnag in a plain Java application.
 
 - Build the app
 

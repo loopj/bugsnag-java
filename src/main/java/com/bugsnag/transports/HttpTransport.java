@@ -3,6 +3,7 @@ package com.bugsnag.transports;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -15,6 +16,7 @@ public class HttpTransport implements Transport {
 
     protected String endpoint = DEFAULT_ENDPOINT;
     protected int timeout = DEFAULT_TIMEOUT;
+    protected Proxy proxy;
 
     public HttpTransport() {}
 
@@ -31,6 +33,10 @@ public class HttpTransport implements Transport {
         this.endpoint = endpoint;
     }
 
+    public void setProxy(Proxy proxy) {
+        this.proxy = proxy;
+    }
+
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
@@ -42,7 +48,12 @@ public class HttpTransport implements Transport {
         HttpURLConnection connection = null;
         try {
             URL url = new URL(endpoint);
-            connection = (HttpURLConnection) url.openConnection();
+            if(proxy != null) {
+                connection = (HttpURLConnection) url.openConnection(proxy);
+            } else {
+                connection = (HttpURLConnection) url.openConnection();
+            }
+
             connection.setDoOutput(true);
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(timeout);

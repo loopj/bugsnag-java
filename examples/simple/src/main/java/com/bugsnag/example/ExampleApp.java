@@ -15,8 +15,10 @@ public class ExampleApp {
         // Set some diagnostic data which will not change during the
         // lifecycle of the application
         bugsnag.addToTab("app", "git-sha", "47a9afd86752964b58ae0aaab6f3a9221c0d5f5e");
+        bugsnag.setReleaseStage("staging");
+        bugsnag.setAppVersion("1.0.1");
 
-        // Create and attach a simple Bugsnag callback
+        // Create and attach a simple Bugsnag callback.
         // Use Callbacks to send custom diagnostic data which changes during
         // the lifecyle of your application
         bugsnag.addCallback(new Callback() {

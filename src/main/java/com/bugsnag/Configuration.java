@@ -9,21 +9,23 @@ import com.bugsnag.transports.AsyncTransport;
 import com.bugsnag.transports.Transport;
 
 import com.bugsnag.callbacks.Callback;
+import com.bugsnag.callbacks.AppCallback;
+import com.bugsnag.callbacks.DeviceCallback;
 import com.bugsnag.callbacks.ServletCallback;
 
 /**
  * User-specified configuration storage object, contains information
  * specified at the client level.
  */
-class Configuration {
+public class Configuration {
     String apiKey;
-    String appVersion;
+    public String appVersion;
     Transport transport;
     String[] filters = new String[]{"password"};
     String[] ignoreClasses;
     String[] notifyReleaseStages = null;
     String[] projectPackages;
-    String releaseStage;
+    public String releaseStage;
 
     MetaData metaData = new MetaData();
     String context;
@@ -35,6 +37,9 @@ class Configuration {
         this.transport = new AsyncTransport();
 
         // Add built-in callbacks
+        addCallback(new AppCallback(this));
+        addCallback(new DeviceCallback());
+
         if(ServletCallback.isAvailable()) {
             addCallback(new ServletCallback());
         }

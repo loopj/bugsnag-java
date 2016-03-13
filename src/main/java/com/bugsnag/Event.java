@@ -1,6 +1,7 @@
 package com.bugsnag;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,9 @@ public class Event {
     public Severity severity = Severity.WARNING;
     public String payloadVersion = "2";
     public String groupingHash;
+    public Map app = new HashMap();
+    public Map device = new HashMap();
+    public Map user = new HashMap();
 
     private Configuration config;
     private Throwable throwable;
@@ -64,5 +68,25 @@ public class Event {
 
     public void setContext(String context) {
         this.context = context;
+    }
+
+    public void setGroupingHash(String groupingHash) {
+        this.groupingHash = groupingHash;
+    }
+
+    public void setUser(String id, String email, String name) {
+        // TODO
+    }
+
+    public void setUserId(String id) {
+        // TODO
+    }
+
+    public void setUserEmail(String email) {
+        // TODO
+    }
+
+    public void setUserEmail(String name) {
+        // TODO
     }
 }

@@ -42,21 +42,7 @@ public class Client {
      * @param  appVersion  the app version to send
      */
     public void setAppVersion(String appVersion) {
-        // TODO: Do something with this
         config.appVersion = appVersion;
-    }
-
-    /**
-     * Set the method of delivery for Bugsnag events. By default we'll send
-     * reports asynchronously using a thread pool to https://notify.bugsnag.com,
-     * but you can override this to use a different sending technique or
-     * endpoint (for example, if you are using Bugsnag On-Premise).
-     *
-     * @param  transport  the transport mechanism to use
-     * @see    Transport
-     */
-    public void setTransport(Transport transport) {
-        config.transport = transport;
     }
 
     /**
@@ -100,6 +86,11 @@ public class Client {
         config.ignoreClasses = ignoreClasses;
     }
 
+    // TODO
+    // public void setLogger(?) {
+    //
+    // }
+
     /**
      * Set for which releaseStages errors should be sent to Bugsnag.
      * Use this to stop errors from development builds being sent.
@@ -139,6 +130,35 @@ public class Client {
      */
     public void setReleaseStage(String releaseStage) {
         config.releaseStage = releaseStage;
+    }
+
+    /**
+     * Set the method of delivery for Bugsnag events. By default we'll send
+     * reports asynchronously using a thread pool to https://notify.bugsnag.com,
+     * but you can override this to use a different sending technique or
+     * endpoint (for example, if you are using Bugsnag On-Premise).
+     *
+     * @param  transport  the transport mechanism to use
+     * @see    Transport
+     */
+    public void setTransport(Transport transport) {
+        config.transport = transport;
+    }
+
+    public void setUser(String id, String email, String name) {
+        // TODO
+    }
+
+    public void setUserId(String id) {
+        // TODO
+    }
+
+    public void setUserEmail(String email) {
+        // TODO
+    }
+
+    public void setUserEmail(String name) {
+        // TODO
     }
 
     /**
@@ -202,8 +222,8 @@ public class Client {
                 callback.beforeNotify(event);
                 // TODO: Halt notification if event.ignore() was called
             } catch (Throwable ex) {
-                // TODO: Log that a callback threw an exception, but dont stop
-                System.out.println("Callback threw an exception");
+                // TODO: Move to logger
+                System.out.println("Callback threw an exception in beforeNotify");
             }
         }
 
@@ -215,6 +235,16 @@ public class Client {
         // TODO: Move this to logger
         System.out.println("Notifying Bugsnag of an exception.");
         config.transport.send(notification);
+
+        // Run afterNotify callbacks
+        for(Callback callback : config.callbacks) {
+            try {
+                callback.afterNotify(event);
+            } catch (Throwable ex) {
+                // TODO: Move to logger
+                System.out.println("Callback threw an exception in afterNotify");
+            }
+        }
     }
 
     /**
