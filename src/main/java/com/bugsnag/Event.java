@@ -7,28 +7,34 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.bugsnag.util.FilterTransformer;
 import com.bugsnag.util.MapMerger;
 
 public class Event {
-    public Severity severity = Severity.WARNING;
-    public String payloadVersion = "2";
-    public String groupingHash;
-    public Map app = new HashMap();
-    public Map device = new HashMap();
-    public Map user = new HashMap();
+    private static final String PAYLOAD_VERSION = "2";
 
     private Configuration config;
+    private Diagnostics clientDiagnostics;
+
     private Throwable throwable;
-    private String context;
+    private Severity severity = Severity.WARNING;
+    private String groupingHash;
+    private Diagnostics diagnostics = new Diagnostics();
 
-    private MetaData metaData = new MetaData();
-
-    Event(Configuration config, Throwable throwable) {
+    Event(Configuration config, Diagnostics clientDiagnostics, Throwable throwable) {
         this.config = config;
+        this.clientDiagnostics = clientDiagnostics;
         this.throwable = throwable;
     }
 
+    @JsonProperty("payloadVersion")
+    public String getPayloadVersion() {
+        return PAYLOAD_VERSION;
+    }
+
+    @JsonProperty("exceptions")
     public List<Exception> getExceptions() {
         List<Exception> exceptions = new ArrayList<Exception>();
 
@@ -42,51 +48,104 @@ public class Event {
         return exceptions;
     }
 
+    @JsonProperty("threads")
     public List<ThreadState> getThreads() {
         return ThreadState.getLiveThreads(config);
     }
 
+    @JsonProperty("groupingHash")
+    public String getGroupingHash() {
+        return groupingHash;
+    }
+
+    @JsonProperty("severity")
+    public Severity getSeverity() {
+        return severity;
+    }
+
+    @JsonProperty("context")
+    public String getContext() {
+        return diagnostics.context != null ? diagnostics.context : clientDiagnostics.context;
+    }
+
+    @JsonProperty("app")
+    public Map getApp() {
+        return new MapMerger(clientDiagnostics.app, diagnostics.app).merge();
+    }
+
+    @JsonProperty("device")
+    public Map getDevice() {
+        return new MapMerger(clientDiagnostics.device, diagnostics.device).merge();
+    }
+
+    @JsonProperty("user")
+    public Map getUser() {
+        return new MapMerger(clientDiagnostics.user, diagnostics.user).merge();
+    }
+
+    @JsonProperty("metaData")
     public Map getMetaData() {
         // Merge metadata maps
-        Map mergedMap = new MapMerger(config.metaData.getProperties(), metaData.getProperties()).merge();
+        Map mergedMap = new MapMerger(clientDiagnostics.metaData.getProperties(), diagnostics.metaData.getProperties()).merge();
 
         // Apply filters
         return Maps.transformEntries(mergedMap, new FilterTransformer(config.filters));
     }
 
-    public String getContext() {
-        return config.context != null ? config.context : this.context;
+    public Event addToTab(String tabName, String key, Object value) {
+        diagnostics.metaData.addToTab(tabName, key, value);
+        return this;
     }
 
-    public void setSeverity(Severity severity) {
-        this.severity = severity;
+    public Event clearTab(String tabName) {
+        diagnostics.metaData.clearTab(tabName);
+        return this;
     }
 
-    public void addToTab(String tabName, String key, Object value) {
-        metaData.addToTab(tabName, key, value);
+    public Event setAppInfo(String key, Object value) {
+        diagnostics.app.put(key, value);
+        return this;
     }
 
-    public void setContext(String context) {
-        this.context = context;
+    public Event setContext(String context) {
+        diagnostics.context = context;
+        return this;
     }
 
-    public void setGroupingHash(String groupingHash) {
+    public Event setDeviceInfo(String key, Object value) {
+        diagnostics.device.put(key, value);
+        return this;
+    }
+
+    public Event setGroupingHash(String groupingHash) {
         this.groupingHash = groupingHash;
+        return this;
     }
 
-    public void setUser(String id, String email, String name) {
-        // TODO
+    public Event setSeverity(Severity severity) {
+        this.severity = severity;
+        return this;
     }
 
-    public void setUserId(String id) {
-        // TODO
+    public Event setUser(String id, String email, String name) {
+        diagnostics.user.put("id", id);
+        diagnostics.user.put("email", email);
+        diagnostics.user.put("name", name);
+        return this;
     }
 
-    public void setUserEmail(String email) {
-        // TODO
+    public Event setUserId(String id) {
+        diagnostics.user.put("id", id);
+        return this;
     }
 
-    public void setUserEmail(String name) {
-        // TODO
+    public Event setUserEmail(String email) {
+        diagnostics.user.put("email", email);
+        return this;
+    }
+
+    public Event setUserName(String name) {
+        diagnostics.user.put("name", name);
+        return this;
     }
 }

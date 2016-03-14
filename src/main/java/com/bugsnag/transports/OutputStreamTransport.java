@@ -3,6 +3,7 @@ package com.bugsnag.transports;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +19,7 @@ public class OutputStreamTransport implements Transport {
     public void send(Object object) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(Include.NON_NULL);
+        mapper.setVisibilityChecker(mapper.getVisibilityChecker().with(JsonAutoDetect.Visibility.NONE));
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
         try {

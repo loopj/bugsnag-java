@@ -9,13 +9,13 @@ import com.bugsnag.Event;
 public class DeviceCallback extends Callback {
     @Override
     public void beforeNotify(Event event) {
-        event.device.put("hostname", getHostname());
-        event.device.put("osName", System.getProperty("os.name"));
-        event.device.put("osVersion", System.getProperty("os.version"));
-        event.device.put("osArch", System.getProperty("os.arch"));
-        event.device.put("runtimeName", System.getProperty("java.runtime.name"));
-        event.device.put("runtimeVersion", System.getProperty("java.runtime.version"));
-        event.device.put("locale", Locale.getDefault());
+        event.setDeviceInfo("hostname", getHostname());
+        event.setDeviceInfo("osName", System.getProperty("os.name"));
+        event.setDeviceInfo("osVersion", System.getProperty("os.version"));
+        event.setDeviceInfo("osArch", System.getProperty("os.arch"));
+        event.setDeviceInfo("runtimeName", System.getProperty("java.runtime.name"));
+        event.setDeviceInfo("runtimeVersion", System.getProperty("java.runtime.version"));
+        event.setDeviceInfo("locale", Locale.getDefault());
     }
 
     private String getHostname() {

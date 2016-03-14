@@ -6,22 +6,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 class ThreadState {
     private Configuration config;
     private Thread thread;
     private StackTraceElement[] stackTraceElements;
-
-    public long getId() {
-        return thread.getId();
-    }
-
-    public String getName() {
-        return thread.getName();
-    }
-
-    public List<Stackframe> getStacktrace() {
-        return Stackframe.getStacktrace(config, stackTraceElements);
-    }
 
     ThreadState(Configuration config, Thread thread, StackTraceElement[] stackTraceElements) {
         this.config = config;
@@ -57,5 +47,20 @@ class ThreadState {
         }
 
         return threads;
+    }
+
+    @JsonProperty("id")
+    public long getId() {
+        return thread.getId();
+    }
+
+    @JsonProperty("name")
+    public String getName() {
+        return thread.getName();
+    }
+
+    @JsonProperty("stacktrace")
+    public List<Stackframe> getStacktrace() {
+        return Stackframe.getStacktrace(config, stackTraceElements);
     }
 }

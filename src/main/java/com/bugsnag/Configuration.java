@@ -9,7 +9,6 @@ import com.bugsnag.transports.AsyncTransport;
 import com.bugsnag.transports.Transport;
 
 import com.bugsnag.callbacks.Callback;
-import com.bugsnag.callbacks.AppCallback;
 import com.bugsnag.callbacks.DeviceCallback;
 import com.bugsnag.callbacks.ServletCallback;
 
@@ -19,17 +18,13 @@ import com.bugsnag.callbacks.ServletCallback;
  */
 public class Configuration {
     String apiKey;
-    public String appVersion;
+    String appVersion;
     Transport transport;
     String[] filters = new String[]{"password"};
     String[] ignoreClasses;
     String[] notifyReleaseStages = null;
     String[] projectPackages;
-    public String releaseStage;
-
-    MetaData metaData = new MetaData();
-    String context;
-
+    String releaseStage;
     Collection<Callback> callbacks = new ArrayList<Callback>();
 
     Configuration(String apiKey) {
@@ -37,7 +32,6 @@ public class Configuration {
         this.transport = new AsyncTransport();
 
         // Add built-in callbacks
-        addCallback(new AppCallback(this));
         addCallback(new DeviceCallback());
 
         if(ServletCallback.isAvailable()) {
@@ -45,7 +39,6 @@ public class Configuration {
         }
     }
 
-    // TODO: Use this
     boolean shouldNotifyForReleaseStage(String releaseStage) {
         if(notifyReleaseStages == null)
             return true;
@@ -54,7 +47,6 @@ public class Configuration {
         return stages.contains(releaseStage);
     }
 
-    // TODO: Use this
     boolean shouldIgnoreClass(String className) {
         if(ignoreClasses == null)
             return false;

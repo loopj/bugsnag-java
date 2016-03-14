@@ -7,11 +7,16 @@ import com.bugsnag.transports.Transport;
 
 public class Client {
     private Configuration config;
+    private Diagnostics diagnostics = new Diagnostics();
+
+    //
+    // Constructors
+    //
 
     /**
      * Initialize a Bugsnag client and automatically send uncaught exceptions
      *
-     * @param  apiKey                   your Bugsnag API key from your Bugsnag dashboard
+     * @param  apiKey   your Bugsnag API key from your Bugsnag dashboard
      */
     public Client(String apiKey) {
         this(apiKey, true);
@@ -36,13 +41,32 @@ public class Client {
         }
     }
 
+
+    //
+    // Configuration
+    //
+
     /**
-     * Set the application version sent to Bugsnag.
+     * Add a callback to execute code before/after every notification to Bugsnag.
      *
-     * @param  appVersion  the app version to send
+     * You can use this to add or modify information attached to an error
+     * before it is sent to your dashboard. You can also stop any events being
+     * sent to Bugsnag completely.
+     *
+     * For example:
+     *
+     *     client.addCallback(new Callback() {
+     *         @Override
+     *         public boolean beforeNotify(Event event) {
+     *             error.setSeverity(Severity.INFO);
+     *         }
+     *     })
+     *
+     * @param  callback  a callback to run before sending errors to Bugsnag
+     * @see    Callback
      */
-    public void setAppVersion(String appVersion) {
-        config.appVersion = appVersion;
+    public void addCallback(Callback callback) {
+        config.addCallback(callback);
     }
 
     /**
@@ -86,11 +110,6 @@ public class Client {
         config.ignoreClasses = ignoreClasses;
     }
 
-    // TODO
-    // public void setLogger(?) {
-    //
-    // }
-
     /**
      * Set for which releaseStages errors should be sent to Bugsnag.
      * Use this to stop errors from development builds being sent.
@@ -129,6 +148,7 @@ public class Client {
      * @see    #setNotifyReleaseStages
      */
     public void setReleaseStage(String releaseStage) {
+        diagnostics.app.put("releaseStage", releaseStage);
         config.releaseStage = releaseStage;
     }
 
@@ -145,43 +165,98 @@ public class Client {
         config.transport = transport;
     }
 
-    public void setUser(String id, String email, String name) {
-        // TODO
-    }
 
-    public void setUserId(String id) {
-        // TODO
-    }
-
-    public void setUserEmail(String email) {
-        // TODO
-    }
-
-    public void setUserEmail(String name) {
-        // TODO
-    }
+    //
+    // Diagnostics
+    //
 
     /**
-     * Add a callback to execute code before/after every notification to Bugsnag.
-     *
-     * You can use this to add or modify information attached to an error
-     * before it is sent to your dashboard. You can also stop any events being
-     * sent to Bugsnag completely.
+     * Add diagnostic information to every error report.
+     * Diagnostic information is collected in "tabs" on your dashboard.
      *
      * For example:
      *
-     *     client.addCallback(new Callback() {
-     *         @Override
-     *         public boolean beforeNotify(Event event) {
-     *             error.setSeverity(Severity.INFO);
-     *         }
-     *     })
+     *     client.addToTab("account", "name", "Acme Co.");
+     *     client.addToTab("account", "payingCustomer", true);
      *
-     * @param  callback  a callback to run before sending errors to Bugsnag
-     * @see    Callback
+     * @param  tab    the dashboard tab to add diagnostic data to
+     * @param  key    the name of the diagnostic information
+     * @param  value  the contents of the diagnostic information
      */
-    public void addCallback(Callback callback) {
-        config.addCallback(callback);
+    public void addToTab(String tab, String key, Object value) {
+        diagnostics.metaData.addToTab(tab, key, value);
+    }
+
+    /**
+     * Remove a tab of app-wide diagnostic information
+     *
+     * @param  tabName  the dashboard tab to remove diagnostic data from
+     */
+    public void clearTab(String tabName) {
+        diagnostics.metaData.clearTab(tabName);
+    }
+
+    /**
+     * Set the application version sent to Bugsnag.
+     *
+     * @param  appVersion  the app version to send
+     */
+    public void setAppVersion(String appVersion) {
+        diagnostics.app.put("version", appVersion);
+    }
+
+    /**
+     * Set information about the end-user currently using the application.
+     *
+     * @param  id       the id of the user
+     * @param  email    the email address of the user
+     * @param  name     the name of the user
+     */
+    public void setUser(String id, String email, String name) {
+        diagnostics.user.put("id", id);
+        diagnostics.user.put("email", email);
+        diagnostics.user.put("name", name);
+    }
+
+    /**
+     * Set the id of the end-user currently using the application.
+     *
+     * @param  id   the id of the user
+     */
+    public void setUserId(String id) {
+        diagnostics.user.put("id", id);
+    }
+
+    /**
+     * Set the email address of the end-user currently using the application.
+     *
+     * @param  email    the email address of the user
+     */
+    public void setUserEmail(String email) {
+        diagnostics.user.put("email", email);
+    }
+
+    /**
+     * Set the name of the end-user currently using the application.
+     *
+     * @param  name     the name of the user
+     */
+    public void setUserName(String name) {
+        diagnostics.user.put("name", name);
+    }
+
+
+    //
+    // Notification
+    //
+
+    /**
+     * Build an Event object to send to Bugsnag via client.notify
+     *
+     * @param  throwable  the exception to send to Bugsnag
+     */
+    public Event buildEvent(Throwable throwable) {
+        return new Event(config, diagnostics, throwable);
     }
 
     /**
@@ -190,7 +265,7 @@ public class Client {
      * @param  throwable  the exception to send to Bugsnag
      */
     public void notify(Throwable throwable) {
-        Event event = new Event(config, throwable);
+        Event event = buildEvent(throwable);
         notify(event);
     }
 
@@ -202,7 +277,7 @@ public class Client {
      *                    Severity.WARNING or Severity.INFO
      */
     public void notify(Throwable throwable, Severity severity) {
-        Event event = new Event(config, throwable);
+        Event event = buildEvent(throwable);
         event.setSeverity(severity);
         notify(event);
     }
@@ -245,31 +320,5 @@ public class Client {
                 System.out.println("Callback threw an exception in afterNotify");
             }
         }
-    }
-
-    /**
-     * Add diagnostic information to every error report.
-     * Diagnostic information is collected in "tabs" on your dashboard.
-     *
-     * For example:
-     *
-     *     client.addToTab("account", "name", "Acme Co.");
-     *     client.addToTab("account", "payingCustomer", true);
-     *
-     * @param  tab    the dashboard tab to add diagnostic data to
-     * @param  key    the name of the diagnostic information
-     * @param  value  the contents of the diagnostic information
-     */
-    public void addToTab(String tab, String key, Object value) {
-        config.metaData.addToTab(tab, key, value);
-    }
-
-    /**
-     * Remove a tab of app-wide diagnostic information
-     *
-     * @param  tabName  the dashboard tab to remove diagnostic data from
-     */
-    public void clearTab(String tabName) {
-        config.metaData.clearTab(tabName);
     }
 }

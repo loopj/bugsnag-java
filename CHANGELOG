@@ -1,3 +1,11 @@
+2.0.0-SNAPSHOT
+-----
+-   Severity is now an enum
+-   Request diagnostics are automatically collected in Servlet apps
+-   JVM runtime, O/S, and locale diagnostics collected
+-   Event object is now exposed for ease of attaching diagnostics to error reports
+-   Chaining support added to Event
+
 1.2.8
 -----
 -   Revert method chaining support in Client

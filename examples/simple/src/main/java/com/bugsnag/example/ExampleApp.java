@@ -45,6 +45,18 @@ public class ExampleApp {
             bugsnag.notify(e, Severity.INFO);
         }
 
+        // Send a handled exception with custom MetaData
+        try {
+            throw new RuntimeException("Handled exception - custom metadata");
+        } catch(RuntimeException e) {
+            Event event = bugsnag.buildEvent(e)
+                .setSeverity(Severity.WARNING)
+                .addToTab("report", "todo", "todo")
+                .setContext("blergh");
+
+            bugsnag.notify(event);
+        }
+
         // Throw an exception
         throw new RuntimeException("Unhandled exception");
     }
