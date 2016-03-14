@@ -16,19 +16,22 @@ public class MapMerger {
     public Map merge() {
         Map result = new HashMap();
 
-        for(Map map : maps) {
-            if(map == null) continue;
+        for (Map map : maps) {
+            if (map == null) {
+                continue;
+            }
 
             // Get a set of all possible keys in base and overrides
             Set allKeys = new HashSet(result.keySet());
             allKeys.addAll(map.keySet());
 
-            for(Object key : allKeys) {
+            for (Object key : allKeys) {
                 Object baseValue = result.get(key);
                 Object overridesValue = map.get(key);
 
-                if(overridesValue != null) {
-                    if(deep && baseValue != null && baseValue instanceof Map && overridesValue instanceof Map) {
+                if (overridesValue != null) {
+                    if (deep && baseValue != null && baseValue instanceof Map
+                        && overridesValue instanceof Map) {
                         // Both original and overrides are Maps, go deeper
                         result.put(key, new MapMerger((Map)baseValue, (Map)overridesValue).merge());
                     } else {

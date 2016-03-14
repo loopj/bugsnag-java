@@ -1,12 +1,12 @@
 package com.bugsnag;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 class ThreadState {
     private Configuration config;
@@ -26,14 +26,14 @@ class ThreadState {
 
         // Sort threads by thread-id
         Object[] keys = liveThreads.keySet().toArray();
-        Arrays.sort(keys, new Comparator<Object>(){
-            public int compare(Object a, Object b) {
-                return Long.valueOf(((Thread) a).getId()).compareTo(((Thread)b).getId());
+        Arrays.sort(keys, new Comparator<Object>() {
+            public int compare(Object first, Object second) {
+                return Long.valueOf(((Thread) first).getId()).compareTo(((Thread)second).getId());
             }
         });
 
         List<ThreadState> threads = new ArrayList<ThreadState>();
-        for(int i = 0; i < keys.length; i++) {
+        for (int i = 0; i < keys.length; i++) {
             Thread thread = (Thread)keys[i];
 
             // Don't show the current stacktrace here. It'll point at this method

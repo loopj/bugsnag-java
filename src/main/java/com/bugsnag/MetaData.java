@@ -1,9 +1,9 @@
 package com.bugsnag;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
 
 class MetaData {
     private Map tabs = new HashMap();
@@ -24,7 +24,7 @@ class MetaData {
 
     private Map getTab(String tabName) {
         Map tab = (Map) tabs.get(tabName);
-        if(tab == null) {
+        if (tab == null) {
             tab = new HashMap();
             tabs.put(tabName, tab);
         }

@@ -1,19 +1,19 @@
 package com.bugsnag.transports;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 public class HttpTransport implements Transport {
     protected static final String DEFAULT_ENDPOINT = "https://notify.bugsnag.com";
-    protected final int DEFAULT_TIMEOUT = 5000;
+    protected static final int DEFAULT_TIMEOUT = 5000;
 
     protected String endpoint = DEFAULT_ENDPOINT;
     protected int timeout = DEFAULT_TIMEOUT;
@@ -44,13 +44,16 @@ public class HttpTransport implements Transport {
 
     public void send(Object object) {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(Include.NON_NULL);
-        mapper.setVisibilityChecker(mapper.getVisibilityChecker().with(JsonAutoDetect.Visibility.NONE));
+        mapper
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .setVisibilityChecker(
+                mapper.getVisibilityChecker().with(JsonAutoDetect.Visibility.NONE)
+            );
 
         HttpURLConnection connection = null;
         try {
             URL url = new URL(endpoint);
-            if(proxy != null) {
+            if (proxy != null) {
                 connection = (HttpURLConnection) url.openConnection(proxy);
             } else {
                 connection = (HttpURLConnection) url.openConnection();
@@ -70,15 +73,17 @@ public class HttpTransport implements Transport {
                     if (outputStream != null) {
                         outputStream.close();
                     }
-                } catch (final IOException ioe) {}
+                } catch (final IOException ioe) {
+                    // Don't care
+                }
             }
 
             // End the request, get the response code
             int status = connection.getResponseCode();
-            if(status / 100 != 2) {
+            if (status / 100 != 2) {
                 throw new RuntimeException("Bad response when sending events to Bugsnag");
             }
-        } catch(JsonProcessingException ex) {
+        } catch (JsonProcessingException ex) {
             throw new RuntimeException("Could not serialize object", ex);
         } catch (IOException ex) {
             throw new RuntimeException("Could not send events to Bugsnag", ex);

@@ -1,25 +1,20 @@
-apply plugin: 'java'
-apply plugin: 'checkstyle'
+plugins {
+    id "java"
+    id "checkstyle"
+
+    // Provides "optional" dependency support
+    id "nebula.optional-base" version '3.0.3'
+}
 
 repositories {
-    mavenCentral()
-}
-
-configurations {
-    provided
-}
-
-sourceSets {
-    main {
-        compileClasspath += configurations.provided
-    }
+    jcenter()
 }
 
 dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.+'
     compile 'com.google.guava:guava:12.+'
-    provided 'org.slf4j:slf4j-api:1.+'
-    provided 'javax.servlet:javax.servlet-api:3.0.1'
+    compile 'org.slf4j:slf4j-api:1.+', optional
+    compile 'javax.servlet:javax.servlet-api:3.0.1', optional
 
     testCompile 'junit:junit:4.+'
     testCompile 'org.slf4j:slf4j-jdk14:1.+'
@@ -29,4 +24,8 @@ test {
     testLogging {
         events "passed", "skipped", "failed", "standardOut", "standardError"
     }
+}
+
+checkstyle {
+    toolVersion = "6.16"
 }

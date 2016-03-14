@@ -1,8 +1,8 @@
 package com.bugsnag.util;
 
-import java.util.Map;
-
 import com.google.common.collect.Maps;
+
+import java.util.Map;
 
 public class FilterTransformer implements Maps.EntryTransformer<Object, Object, Object> {
     private static final String FILTERED_PLACEHOLDER = "[FILTERED]";
@@ -16,7 +16,7 @@ public class FilterTransformer implements Maps.EntryTransformer<Object, Object, 
 
     @Override
     public Object transformEntry(Object key, Object value) {
-        if(deep && value instanceof Map) {
+        if (deep && value instanceof Map) {
             return Maps.transformEntries((Map)value, this);
         }
 
@@ -24,10 +24,12 @@ public class FilterTransformer implements Maps.EntryTransformer<Object, Object, 
     }
 
     private boolean shouldFilterKey(Object key) {
-        if(keyFilters == null || key == null || !(key instanceof String)) return false;
+        if (keyFilters == null || key == null || !(key instanceof String)) {
+            return false;
+        }
 
-        for(String filter : keyFilters) {
-            if(((String)key).contains(filter)) {
+        for (String filter : keyFilters) {
+            if (((String)key).contains(filter)) {
                 return true;
             }
         }

@@ -1,23 +1,23 @@
 package com.bugsnag.callbacks;
 
+import com.bugsnag.Event;
+import com.bugsnag.servlet.BugsnagServletRequestListener;
+
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
-
-import com.bugsnag.Event;
-
-import com.bugsnag.servlet.BugsnagServletRequestListener;
 
 public class ServletCallback extends Callback {
     private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
 
     public static boolean isAvailable() {
         try {
-            Class.forName("javax.servlet.ServletRequestListener", false, ServletCallback.class.getClassLoader());
+            Class.forName("javax.servlet.ServletRequestListener", false,
+                          ServletCallback.class.getClassLoader());
+
             return true;
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException ex) {
             return false;
         }
     }
@@ -25,7 +25,9 @@ public class ServletCallback extends Callback {
     public void beforeNotify(Event event) {
         // Check if we have any servlet request data available
         HttpServletRequest request = BugsnagServletRequestListener.getServletRequest();
-        if(request == null) return;
+        if (request == null) {
+            return;
+        }
 
         // Add request information to metaData
         event.addToTab("request", "url", request.getRequestURL().toString());

@@ -3,9 +3,9 @@ package com.bugsnag;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum Severity {
-    ERROR   ("error"),
-    WARNING ("warning"),
-    INFO    ("info");
+    ERROR("error"),
+    WARNING("warning"),
+    INFO("info");
 
     private final String value;
 

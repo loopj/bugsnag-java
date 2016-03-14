@@ -1,16 +1,15 @@
 package com.bugsnag;
 
+import com.bugsnag.util.FilterTransformer;
+import com.bugsnag.util.MapMerger;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Maps;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.collect.Maps;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import com.bugsnag.util.FilterTransformer;
-import com.bugsnag.util.MapMerger;
 
 public class Event {
     private static final String PAYLOAD_VERSION = "2";
@@ -39,7 +38,7 @@ public class Event {
         List<Exception> exceptions = new ArrayList<Exception>();
 
         Throwable currentThrowable = throwable;
-        while(currentThrowable != null) {
+        while (currentThrowable != null) {
             exceptions.add(new Exception(config, currentThrowable));
 
             currentThrowable = currentThrowable.getCause();
@@ -86,7 +85,8 @@ public class Event {
     @JsonProperty("metaData")
     public Map getMetaData() {
         // Merge metadata maps
-        Map mergedMap = new MapMerger(clientDiagnostics.metaData.getProperties(), diagnostics.metaData.getProperties()).merge();
+        Map mergedMap = new MapMerger(clientDiagnostics.metaData.getProperties(),
+                                      diagnostics.metaData.getProperties()).merge();
 
         // Apply filters
         return Maps.transformEntries(mergedMap, new FilterTransformer(config.filters));

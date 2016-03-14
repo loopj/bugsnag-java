@@ -25,13 +25,13 @@ public class AsyncTransport extends HttpTransport {
     }
 
     public AsyncTransport(Transport baseTransport, ExecutorService executorService) {
-        if(baseTransport == null) {
+        if (baseTransport == null) {
             this.baseTransport = new HttpTransport();
         } else {
             this.baseTransport = baseTransport;
         }
 
-        if(executorService == null) {
+        if (executorService == null) {
             this.executorService = Executors.newSingleThreadExecutor();
         } else {
             this.executorService = executorService;
@@ -49,7 +49,9 @@ public class AsyncTransport extends HttpTransport {
     }
 
     public void send(final Object object) {
-        if(shuttingDown) return;
+        if (shuttingDown) {
+            return;
+        }
 
         executorService.execute(new Runnable() {
             @Override
@@ -69,12 +71,10 @@ public class AsyncTransport extends HttpTransport {
                 System.out.println("Shutdown took too long - forcing a shutdown now");
                 executorService.shutdownNow();
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ex) {
             // TODO: Move to logger
             System.out.println("Shutdown was interrupted - forcing a shutdown now");
             executorService.shutdownNow();
-        } finally {
-
         }
     }
 

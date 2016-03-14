@@ -1,10 +1,10 @@
 package com.bugsnag.callbacks;
 
+import com.bugsnag.Event;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Locale;
-
-import com.bugsnag.Event;
 
 public class DeviceCallback extends Callback {
     @Override
@@ -27,13 +27,13 @@ public class DeviceCallback extends Callback {
         // Try the HOSTNAME env variable (most unix systems)
         String hostname = System.getenv("HOSTNAME");
         if (hostname != null) {
-           return hostname;
+            return hostname;
         }
 
         // Resort to dns hostname lookup
         try {
             return InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
+        } catch (UnknownHostException ex) {
             // Give up
         }
 

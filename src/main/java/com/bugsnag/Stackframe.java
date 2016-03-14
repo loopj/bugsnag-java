@@ -1,9 +1,9 @@
 package com.bugsnag;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 class Stackframe {
     private Configuration config;
@@ -14,9 +14,9 @@ class Stackframe {
         this.el = el;
     }
 
-    static List<Stackframe> getStacktrace(Configuration config, StackTraceElement[] stackTraceElements) {
+    static List<Stackframe> getStacktrace(Configuration config, StackTraceElement[] elements) {
         List<Stackframe> stacktrace = new ArrayList<Stackframe>();
-        for(StackTraceElement el : stackTraceElements) {
+        for (StackTraceElement el : elements) {
             stacktrace.add(new Stackframe(config, el));
         }
 
