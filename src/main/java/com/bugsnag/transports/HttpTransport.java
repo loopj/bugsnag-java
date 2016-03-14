@@ -19,7 +19,9 @@ public class HttpTransport implements Transport {
     protected int timeout = DEFAULT_TIMEOUT;
     protected Proxy proxy;
 
-    public HttpTransport() {}
+    public HttpTransport() {
+
+    }
 
     public HttpTransport(String endpoint) {
         this.endpoint = endpoint;

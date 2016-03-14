@@ -22,7 +22,7 @@ class ThreadState {
     static List<ThreadState> getLiveThreads(Configuration config) {
         // Get current thread id (the crashing thread) and stacktraces for all live threads
         long crashingThreadId = Thread.currentThread().getId();
-        Map<Thread,StackTraceElement[]> liveThreads = Thread.getAllStackTraces();
+        Map<Thread, StackTraceElement[]> liveThreads = Thread.getAllStackTraces();
 
         // Sort threads by thread-id
         Object[] keys = liveThreads.keySet().toArray();

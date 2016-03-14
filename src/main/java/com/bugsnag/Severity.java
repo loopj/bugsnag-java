@@ -9,7 +9,7 @@ public enum Severity {
 
     private final String value;
 
-    private Severity(String value) {
+    Severity(String value) {
         this.value = value;
     }
 

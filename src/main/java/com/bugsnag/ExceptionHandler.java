@@ -5,7 +5,7 @@ import java.util.WeakHashMap;
 
 class ExceptionHandler implements UncaughtExceptionHandler {
     private final UncaughtExceptionHandler originalHandler;
-    final WeakHashMap<Client, Boolean> clientMap = new WeakHashMap<Client, Boolean>();
+    private final WeakHashMap<Client, Boolean> clientMap = new WeakHashMap<Client, Boolean>();
 
     static void enable(Client client) {
         UncaughtExceptionHandler currentHandler = Thread.getDefaultUncaughtExceptionHandler();
@@ -38,7 +38,7 @@ class ExceptionHandler implements UncaughtExceptionHandler {
         }
     }
 
-    public ExceptionHandler(UncaughtExceptionHandler originalHandler) {
+    ExceptionHandler(UncaughtExceptionHandler originalHandler) {
         this.originalHandler = originalHandler;
     }
 
