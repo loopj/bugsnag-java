@@ -5,7 +5,12 @@ import com.bugsnag.transports.AsyncTransport;
 import com.bugsnag.transports.HttpTransport;
 import com.bugsnag.transports.Transport;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Client {
+    private static final Logger logger = LoggerFactory.getLogger(Client.class);
+
     private Configuration config;
     private Diagnostics diagnostics = new Diagnostics();
 
@@ -235,10 +240,11 @@ public class Client {
      * Notify Bugsnag of a handled exception.
      *
      * @param throwable the exception to send to Bugsnag
+     * @return true unless the event was ignored
      */
-    public void notify(Throwable throwable) {
+    public boolean notify(Throwable throwable) {
         Event event = buildEvent(throwable);
-        notify(event);
+        return notify(event);
     }
 
     /**
@@ -247,11 +253,12 @@ public class Client {
      * @param throwable the exception to send to Bugsnag
      * @param severity the severity of the error, one of {#link Severity#ERROR},
      *                 {@link Severity#WARNING} or {@link Severity#INFO}
+     * @return true unless the event was ignored
      */
-    public void notify(Throwable throwable, Severity severity) {
+    public boolean notify(Throwable throwable, Severity severity) {
         Event event = buildEvent(throwable);
         event.setSeverity(severity);
-        notify(event);
+        return notify(event);
     }
 
     /**
@@ -259,22 +266,34 @@ public class Client {
      * for this particular event.
      *
      * @param event the {@link Event} object to send to Bugsnag
+     * @return true unless the event was ignored
      *
      * @see Event
      * @see #buildEvent
      */
-    public void notify(Event event) {
-        // TODO: Don't notify if this error class should be ignored
-        // TODO: Don't notify unless releaseStage is in notifyReleaseStages
+    public boolean notify(Event event) {
+        // Don't notify if this error class should be ignored
+        if (config.shouldIgnoreClass(event.getExceptionName())) {
+            logger.info("Not notifying - exception class is in 'ignoreClasses'");
+            return false;
+        }
+
+        // Don't notify unless releaseStage is in notifyReleaseStages
+        if (!config.shouldNotifyForReleaseStage()) {
+            logger.info("Not notifying - 'releaseStage' is not in 'notifyReleaseStages'");
+            return false;
+        }
 
         // Run beforeNotify callbacks
         for (Callback callback : config.callbacks) {
             try {
+                // TODO: Have a way to halt execution based on callbacks
+                //         - return false from callback (gross)
+                //         - set event.shouldIgnore(true) in a callback
+                //         - throw a special exception in a callback (Callback.HaltExecution?)
                 callback.beforeNotify(event);
-                // TODO: Halt notification if event.ignore() was called
             } catch (Throwable ex) {
-                // TODO: Move to logger
-                System.out.println("Callback threw an exception in beforeNotify");
+                logger.warn("Callback threw an exception in beforeNotify", ex);
             }
         }
 
@@ -283,18 +302,19 @@ public class Client {
         notification.addEvent(event);
 
         // Deliver the notification
-        // TODO: Move this to logger
-        System.out.println("Notifying Bugsnag of an exception.");
+        logger.info("Notifying Bugsnag of an exception.");
         config.transport.send(notification);
 
         // Run afterNotify callbacks
         for (Callback callback : config.callbacks) {
             try {
+                // Don't run further callbacls if callback.afterNotify returns false
                 callback.afterNotify(event);
             } catch (Throwable ex) {
-                // TODO: Move to logger
-                System.out.println("Callback threw an exception in afterNotify");
+                logger.warn("Callback threw an exception in afterNotify", ex);
             }
         }
+
+        return true;
     }
 }

@@ -1,16 +1,20 @@
 package com.bugsnag.transports;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class AsyncTransport extends HttpTransport {
+    private static final Logger logger = LoggerFactory.getLogger(AsyncTransport.class);
     private static final int SHUTDOWN_TIMEOUT = 5000;
 
     protected Transport baseTransport;
     protected ExecutorService executorService;
     private boolean shuttingDown = false;
-    private ShutdownHandler shutdownHandler = new ShutdownHandler();
+    private final ShutdownHandler shutdownHandler = new ShutdownHandler();
 
     public AsyncTransport() {
         this(null, null);
@@ -50,6 +54,7 @@ public class AsyncTransport extends HttpTransport {
 
     public void send(final Object object) {
         if (shuttingDown) {
+            logger.warn("Not notifying - 'sending' threads are already shutting down");
             return;
         }
 
@@ -67,13 +72,11 @@ public class AsyncTransport extends HttpTransport {
 
         try {
             if (!executorService.awaitTermination(SHUTDOWN_TIMEOUT, TimeUnit.MILLISECONDS)) {
-                // TODO: Move to logger
-                System.out.println("Shutdown took too long - forcing a shutdown now");
+                logger.warn("Shutdown of 'sending' threads took too long - forcing a shutdown");
                 executorService.shutdownNow();
             }
         } catch (InterruptedException ex) {
-            // TODO: Move to logger
-            System.out.println("Shutdown was interrupted - forcing a shutdown now");
+            logger.warn("Shutdown of 'sending' threads was interrupted - forcing a shutdown");
             executorService.shutdownNow();
         }
     }

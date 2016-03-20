@@ -91,6 +91,27 @@ public class Event {
         return Maps.transformEntries(mergedMap, new FilterTransformer(config.filters));
     }
 
+    /**
+     * The {@linkplain Throwable exception} which triggered this Event report.
+     */
+    public Throwable getException() {
+        return throwable;
+    }
+
+    /**
+     * Get the class name from the exception contained in this Event report.
+     */
+    public String getExceptionName() {
+        return throwable.getClass().getName();
+    }
+
+    /**
+     * Get the message from the exception contained in this Event report.
+     */
+    public String getExceptionMessage() {
+        return throwable.getLocalizedMessage();
+    }
+
     public Event addToTab(String tabName, String key, Object value) {
         diagnostics.metaData.addToTab(tabName, key, value);
         return this;

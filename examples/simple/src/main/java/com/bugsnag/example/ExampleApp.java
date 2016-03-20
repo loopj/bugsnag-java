@@ -51,7 +51,7 @@ public class ExampleApp {
         } catch(RuntimeException e) {
             Event event = bugsnag.buildEvent(e)
                 .setSeverity(Severity.WARNING)
-                .addToTab("report", "todo", "todo")
+                .addToTab("report", "something", "blah")
                 .setContext("blergh");
 
             bugsnag.notify(event);

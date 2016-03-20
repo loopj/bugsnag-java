@@ -55,9 +55,6 @@ class ExceptionHandler implements UncaughtExceptionHandler {
             // Emulate the java exception print style
             System.err.printf("Exception in thread \"%s\" ", thread.getName());
             throwable.printStackTrace(System.err);
-
-            // TODO: Remove this?
-            System.exit(1);
         }
     }
 }

@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class Configuration {
+class Configuration {
     String apiKey;
     String appVersion;
     Transport transport;
@@ -26,8 +26,6 @@ public class Configuration {
         this.apiKey = apiKey;
         this.transport = new AsyncTransport();
 
-        // TODO: How to detect projectPackages automatically?
-
         // Add built-in callbacks
         addCallback(new DeviceCallback());
 
@@ -36,7 +34,7 @@ public class Configuration {
         }
     }
 
-    boolean shouldNotifyForReleaseStage(String releaseStage) {
+    boolean shouldNotifyForReleaseStage() {
         if (notifyReleaseStages == null) {
             return true;
         }

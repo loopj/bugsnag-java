@@ -5,6 +5,7 @@ repositories {
 }
 
 dependencies {
+    compile 'org.slf4j:slf4j-simple:1.+'
     compile rootProject
 }
 
