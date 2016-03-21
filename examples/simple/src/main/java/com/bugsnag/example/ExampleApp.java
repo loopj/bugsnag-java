@@ -1,4 +1,4 @@
-package com.bugsnag.example;
+package com.bugsnag.example.simple;
 
 import java.util.Date;
 

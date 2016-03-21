@@ -9,4 +9,4 @@ dependencies {
     compile rootProject
 }
 
-mainClassName = "com.bugsnag.example.ExampleApp"
+mainClassName = "com.bugsnag.example.simple.ExampleApp"
